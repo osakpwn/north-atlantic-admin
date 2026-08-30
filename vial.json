@@ -1,0 +1,7 @@
+{
+			"name": "first-everest-admin", 
+			"version": "0.0.1",
+			"dependencies": "use:requirements.txt",
+			"macros": [], 
+			"css": "local"
+}

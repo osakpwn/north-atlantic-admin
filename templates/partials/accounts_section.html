@@ -1,0 +1,147 @@
+{% if success %}
+<div style="margin-bottom: 1rem; padding: 1rem; background: #d4edda; color: #155724; border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; animation: fadeIn 0.3s;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    Balance updated successfully!
+</div>
+{% endif %}
+
+{% if accounts %}
+<div style="display: grid; gap: 1.5rem;">
+    {% for account in accounts %}
+    <div style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <!-- Account Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border);">
+            <div style="flex: 1;">
+                <h3 contenteditable="true"
+                    style="font-size: 1.25rem; margin: 0 0 0.25rem 0; outline: none; padding: 0.25rem; border-radius: 4px;"
+                    onblur="updateField(this, '{{ url_for('views.update_account_field', user_id=user_id, account_id=account.id) }}', 'account_type')">{{ account.account_type }}</h3>
+                <p contenteditable="true"
+                   style="color: var(--gray); font-size: 0.875rem; margin: 0; outline: none; padding: 0.25rem; border-radius: 4px;"
+                   onblur="updateField(this, '{{ url_for('views.update_account_field', user_id=user_id, account_id=account.id) }}', 'account_number')">{{ account.account_number or 'Click to add account number' }}</p>
+            </div>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <div style="font-size: 2rem; font-weight: 700; color: var(--success);">
+                    ${{ "%.2f"|format(account.balance) }}
+                </div>
+                <button hx-post="{{ url_for('views.delete_account', user_id=user_id, account_id=account.id) }}"
+                        hx-target="#tab-content"
+                        hx-swap="innerHTML"
+                        hx-confirm="Delete this account?"
+                        style="background: var(--danger); color: white; border: none; padding: 0.625rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; transition: all 0.2s;"
+                        onmouseover="this.style.transform='scale(1.05)'"
+                        onmouseout="this.style.transform='scale(1)'">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Increment/Decrement Section -->
+        <form hx-post="{{ url_for('views.update_account_balance', user_id=user_id, account_id=account.id) }}"
+              hx-target="#tab-content"
+              hx-swap="innerHTML"
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              
+            <!-- INCREMENT -->
+            <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid var(--success);">
+                <label style="font-size: 0.875rem; color: var(--success); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="19 12 12 5 5 12"></polyline>
+                    </svg>
+                    Increment Balance
+                </label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="number" 
+                           name="increment" 
+                           step="0.01" 
+                           min="0"
+                           placeholder="0.00"
+                           style="flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+                    <button type="submit" 
+                            name="action" 
+                            value="increment" 
+                            class="btn btn-success" 
+                            style="padding: 0.5rem 1rem; white-space: nowrap;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Add
+                    </button>
+                </div>
+            </div>
+            
+            <!-- DECREMENT -->
+            <div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border: 1px solid var(--danger);">
+                <label style="font-size: 0.875rem; color: var(--danger); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <polyline points="5 12 12 19 19 12"></polyline>
+                    </svg>
+                    Decrement Balance
+                </label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="number" 
+                           name="decrement" 
+                           step="0.01" 
+                           min="0"
+                           placeholder="0.00"
+                           style="flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 6px;">
+                    <button type="submit" 
+                            name="action" 
+                            value="decrement" 
+                            class="btn btn-danger" 
+                            style="padding: 0.5rem 1rem; white-space: nowrap;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Deduct
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div style="text-align: center; padding: 3rem; color: var(--gray);">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 1rem;">
+        <line x1="12" y1="1" x2="12" y2="23"></line>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+    </svg>
+    <p>No accounts found</p>
+</div>
+{% endif %}
+
+<style>
+@media (max-width: 768px) {
+    form[hx-post*="update-balance"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+</style>
+
+<script>
+function updateField(element, url, field) {
+    const value = element.textContent.trim();
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'HX-Request': 'true'
+        },
+        body: `field=${field}&value=${encodeURIComponent(value)}`
+    })
+    .then(response => response.text())
+    .then(html => {
+        document.getElementById('tab-content').innerHTML = html;
+        htmx.process(document.getElementById('tab-content'));
+    });
+}
+</script>
